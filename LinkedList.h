@@ -1,7 +1,7 @@
 /*
  * LinkedList.h
  *
- *  Created on: Apr 3, 2017
+ *  Created on: Apr 20, 2017
  *      Author: Mostafa Mahmoud
  */
 
@@ -11,242 +11,80 @@
 #include <iostream>
 using namespace std;
 
-//template <class Type> class LinkedList;	//temp line used in debugging phase
+
+//Node Class Declaration
 
 template <class Type>
 class Node {
-public:
+
 	//Member variables
+private:
 	Type data;
+	Node *prev;
 	Node *next;
 
-public:
-	//Constructors and Destrcutor
-	Node();	// : data(0), next(0) {}
-	Node(Type d);	//: data(d), next(0) {}
+	//Constructors and Destructor
+	explicit Node();
+	explicit Node(const Type &passedData);
 	~Node();
 
 	//Methods
-	Type getData();
+	Type getData() const;
 	void setData(Type d);
-	Node* getNext();
+	Node* getNext() const;
 	void setNext(Type d);
 
-	//Friend Classes
-	//friend class LinkedList;
+	template <class>
+	friend class LinkedList;
+
 };
+
 
 ////////////////////////////////////////////////////////////////////////////
 
+//LinkedList Class Declaration
+
 template <class Type>
 class LinkedList {
-private:
+
+protected:
 	//Member variables
 	Node<Type> *head;
+	Node<Type> *tail;
+	unsigned long theSize;
 
 public:
 	//Constructors and Destructor
-	LinkedList();	// : head(0) {}
-	LinkedList(Type d);		// : head(new Node<Type>(d)) {}
+	explicit LinkedList();
+	explicit LinkedList(const Type &passedData);
 	~LinkedList();
 
 	//Methods
-	Node<Type>* getHead();
-	void insertNode(Type d);
-	void removeElement(Type d);
-	void removeElementAt(int pos);
-	Node<Type>* findNode(Type d);
-	bool isEmpty();
-	void printList();
-	void printAll(Node<Type>* p);
-	void insertNodeAt(Type d, int pos);
+	void push_back(const Type &passedData);
+	void push_front(const Type &passedData);
+	void pop_back();
+	void pop_front();
+	void insertAt(const Type &passedData, unsigned long pos);
+	void removeAt(unsigned long pos);
+	void removeFirstOccurenceOf(const Type &passedData);
+	void removeLastOccurenceOf(const Type &passedData);
+	Node<Type>* find(const Type &passedData);
+	void clear();
+	void display() const;
+	Node<Type>* getHead() const;
+	Node<Type>* getTail() const;
+	Type front() const;
+	Type back() const;
+	bool isEmpty() const;
+	unsigned long size() const;
+
 	void reverse();
-	int size();
-	int average();
+
+private:
+	void print(Node<Type>* ptr) const;
+
 };
 
-////////////////////////////////////////////////////////////////////////
-
-//Implementation of LinkedList Class
-
-//LinkedList Constructors and Destructors
-
-template <class Type>
-LinkedList<Type>::LinkedList() {
-	head = NULL;
-}
-
-template <class Type>
-LinkedList<Type>::LinkedList(Type d) {
-	head = new Node<Type>(d);
-}
-
-template <class Type>
-LinkedList<Type>::~LinkedList() {
-	if (head != NULL) {
-		while (head->next != NULL) {
-			Node<Type> *tmp = head->next;
-			delete head;
-			head = tmp;
-		}
-		delete head;
-	}
-}
-
-//LinkedList Methods
-
-template <class Type>
-Node<Type>* LinkedList<Type>::getHead() {
-	return this->head;
-}
-
-template <class Type>
-void LinkedList<Type>::insertNode(Type d) {
-	if (head == NULL)
-		head = new Node<Type>(d);
-	else {
-		Node<Type> *tmp = new Node<Type>(d);
-		tmp->next = head;
-		head = tmp;
-	}
-}
-
-template <class Type>
-void LinkedList<Type>::removeElement(Type d) {
-	if (head == NULL)	//in case the list is empty already
-		return;
-
-	if (head->data == d) {		//in case it is the first element to be removed
-		Node<Type> *tmp = head;
-		head = head->next;
-		delete tmp;
-		return;
-	}
-	else {
-		Node<Type> *p = head;
-		if (p->next == NULL)	//check if this is needed
-			return;
-		while (p->next->data != d) {
-			p = p->next;
-			if (p->next == NULL)
-				return;
-		}
-		Node<Type> *p2 = p->next;
-		p->next = p2->next;
-		delete p2;
-	}
-}
-
-template <class Type>
-void LinkedList<Type>::removeElementAt(int pos) {
-	if (head == NULL)	//in case the list is empty already
-		return;
-
-	Node<Type> *p = head;
-	for (int i = 0; i < pos-1; ++i)
-		p = p->next;
-
-	Node<Type> *tmp = p->next;
-	p->next = tmp->next;
-	delete tmp;
-}
-
-template <class Type>
-Node<Type>* LinkedList<Type>::findNode(Type d) {
-	Node<Type> *p = head;
-	while (p != NULL) {
-		if (p->data == d)
-			return p;
-		p = p->next;
-	}
-	return NULL;
-}
-
-template <class Type>
-bool LinkedList<Type>::isEmpty() {
-	return (head == NULL? true: false);
-}
-
-template <class Type>
-void LinkedList<Type>::printList() {	//The interface to be used by external user
-	cout << "[";
-	printAll(this->head);
-	cout << "]" << endl;
-}
-
-template <class Type>
-void LinkedList<Type>::printAll(Node<Type>* p) {
-	if (p == NULL)
-		return;
-	else {
-		cout << p->data;
-		if (p->next != NULL)
-			cout << ", ";
-		printAll(p->next);
-	}
-}
-
-template <class Type>
-void LinkedList<Type>::insertNodeAt(Type d, int pos) {
-	if (pos == 0)
-		insertNode(d);
-	else {
-		Node<Type> *after = head;
-		while (--pos && after->next != NULL)
-			after = after->next;
-		Node<Type> *tmp = new Node<Type>(d);
-		tmp->next = after->next;
-		after->next = tmp;
-	}
-}
-
-template <class Type>
-void LinkedList<Type>::reverse() {
-	if (head == NULL)
-		return;
-
-	int len = this->size();
-	Node<Type> *ptr = head;
-	Type *tmpArray = new Type[len];
-	for (int i = 0; i < len; ++i) {
-		tmpArray[i] = ptr->data;
-		ptr = ptr->next;
-	}
-	ptr = head;
-	for (int i = len-1; i >= 0; --i) {
-		ptr->data = tmpArray[i];
-		ptr = ptr->next;
-	}
-	delete[] tmpArray;
-}
-
-template <class Type>
-int LinkedList<Type>::size() {
-	if (head == NULL)
-		return (0);
-
-	int i = 0;
-	Node<Type> *p = head;
-	while (p != NULL) {
-		p = p->next;
-		i++;
-	}
-	return i;
-}
-
-template <class Type>
-int LinkedList<Type>::average() {
-	if (head == NULL)
-		return (0);
-
-	int sum = 0;
-	Node<Type> *ptr = head;
-	while (ptr != NULL) {
-		sum += ptr->data;
-		ptr = ptr->next;
-	}
-	return (sum / this->size());
-}
 
 
 
@@ -254,41 +92,316 @@ int LinkedList<Type>::average() {
 
 //Implementation of Node Class
 
-//Node Class Constructors and Destructors
+//Node Class Constructors and Destructor
 
 template <class Type>
-Node<Type>::Node() {
-	data = 0;
-	next = NULL;
-}
-template <class Type>
-Node<Type>::Node(Type d) {
-	data = d;
-	next = NULL;
-}
-//Node Destructor (Not needed since it deleting nodes was taken care of in LinkedList class)
-template <class Type>
-Node<Type>::~Node() {
-	//delete this->next;
-}
-
-//Node Member Methods
+Node<Type>::Node()
+	: data{0}, prev{NULL}, next{NULL} {}
 
 template <class Type>
-Type Node<Type>::getData() {
+Node<Type>::Node(const Type &passedData)
+	: data {passedData}, prev{NULL}, next{NULL} {}
+
+template <class Type>
+Node<Type>::~Node() {}	//No implementation needed since it deleting nodes was taken care of in LinkedList class
+
+
+//Node Class Member Methods
+
+template <class Type>
+Type Node<Type>::getData() const {
 	return this->data;
 }
+
 template <class Type>
 void Node<Type>::setData(Type d) {
 	this->data = d;
 }
+
 template <class Type>
-Node<Type>* Node<Type>::getNext() {
+Node<Type>* Node<Type>::getNext() const {
 	return this->next;
 }
+
 template <class Type>
 void Node<Type>::setNext(Type d) {
 	next->data = d;
 }
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+//Implementation of LinkedList Class
+
+//LinkedList Class Constructors and Destructors
+
+template <class Type>
+LinkedList<Type>::LinkedList()
+	: head{NULL}, tail{NULL} , theSize{0} {}
+
+template <class Type>
+LinkedList<Type>::LinkedList(const Type &passedData)
+	: head{ new Node<Type>(passedData) }, tail {head}, theSize{1} {}
+
+template <class Type>
+LinkedList<Type>::~LinkedList() {
+	clear();
+}
+
+
+//LinkedList Class Methods
+
+template <class Type>
+void LinkedList<Type>::push_back(const Type &passedData) {
+
+	if (isEmpty()) {
+		head = new Node<Type>(passedData);
+		tail = head;
+		theSize++;
+	}
+	else {
+		Node<Type> *tmp = tail;
+		tail = new Node<Type>(passedData);
+		tmp->next = tail;
+		tail->prev = tmp;
+		theSize++;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::push_front(const Type &passedData) {
+
+	if (isEmpty()) {
+		head = new Node<Type>(passedData);
+		tail = head;
+		theSize++;
+	}
+	else {
+		Node<Type> *tmp = head;
+		head = new Node<Type>(passedData);
+		tmp->prev = head;
+		head->next = tmp;
+		theSize++;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::pop_back() {
+
+	if (this->size() == 1) {
+		Node<Type> *tmp = tail;
+		head = NULL;
+		tail = NULL;
+		delete tmp;
+		theSize--;
+	}
+	else {
+		Node<Type> *tmp = tail;
+		tail = tail->prev;
+		tail->next = NULL;
+		delete tmp;
+		theSize--;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::pop_front() {
+
+	if (this->size() == 1) {
+		Node<Type> *tmp = head;
+		head = NULL;
+		tail = NULL;
+		delete tmp;
+		theSize--;
+	}
+	else {
+		Node<Type> *tmp = head;
+		head = head->next;
+		head->prev = NULL;
+		delete tmp;
+		theSize--;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::display() const {	//The interface to be used by external user
+
+	cout << "[ ";
+	print(this->head);
+	cout << " ]" << endl;
+
+}
+
+template <class Type>
+void LinkedList<Type>::print(Node<Type>* ptr) const {
+
+	if (ptr == NULL)
+		return;
+	else {
+		cout << ptr->data;
+		if (ptr->next != NULL)
+			cout << ", ";
+		print(ptr->next);
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::insertAt(const Type &passedData, unsigned long pos) {
+
+	if (pos == 0)
+		push_front(passedData);
+	else if (pos == this->size())
+		push_back(passedData);
+	else if (pos < 0 || pos > this->size()) {
+		//throw out of bounds exception
+	}
+	else if (pos < this->size() / 2) {	//traverse from head
+		Node<Type> *tmpNode = new Node<Type>(passedData);
+		Node<Type> *ptr = head;
+		while (pos--) {
+			ptr = ptr->next;
+		}
+		tmpNode->prev = ptr->prev;
+		tmpNode->next = ptr;
+		ptr->prev -> next = tmpNode;
+		ptr->prev = tmpNode;
+		theSize++;
+	}
+	else {	//traverse from tail
+		Node<Type> *tmpNode = new Node<Type>(passedData);
+		Node<Type> *ptr = tail;
+		pos = this->size() - pos - 1;
+		while (pos--) {
+			ptr = ptr->prev;
+		}
+		tmpNode->prev = ptr->prev;
+		tmpNode->next = ptr;
+		ptr->prev->next = tmpNode;
+		ptr->prev = tmpNode;
+		theSize++;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::removeAt(unsigned long pos) {
+
+	if (pos == 0)
+		pop_front();
+	else if (pos == this->size() - 1)
+		pop_back();
+	else if (pos < 0 || pos > this->size()) {
+		//throw out of bounds exception
+	}
+	else if (pos < this->size() / 2) {	//traverse from head
+		Node<Type> *ptr = head;
+		while (pos--) {
+			ptr = ptr->next;
+		}
+		ptr->prev -> next = ptr->next;
+		ptr->next -> prev = ptr->prev;
+		delete ptr;
+		theSize--;
+	}
+	else {	//traverse from tail
+		Node<Type> *ptr = tail;
+		pos = this->size() - pos - 1;
+		while (pos--) {
+			ptr = ptr->prev;
+		}
+		ptr->prev -> next = ptr->next;
+		ptr->next -> prev = ptr->prev;
+		delete ptr;
+		theSize--;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::removeFirstOccurenceOf(const Type &passedData) {
+
+	unsigned long idx = 0;
+	Node<Type> *ptr = head;
+	while (ptr->data != passedData && ptr->next != NULL) {
+		ptr = ptr->next;
+		idx++;
+	}
+
+	removeAt(idx);	//it is neater this way, although it increases execution time and loops again through list
+
+}
+
+template <class Type>
+void LinkedList<Type>::removeLastOccurenceOf(const Type &passedData) {
+
+	unsigned long idx = this->size() - 1;
+	Node<Type> *ptr = tail;
+	while (ptr->data != passedData && ptr->prev != NULL) {
+		ptr = ptr->prev;
+		idx--;
+	}
+
+	removeAt(idx);	//it is neater this way, although it increases execution time and loops again through list
+}
+
+template <class Type>
+Node<Type>* LinkedList<Type>::getHead() const {
+	return head;
+}
+
+template <class Type>
+Node<Type>* LinkedList<Type>::getTail() const {
+	return tail;
+}
+
+template <class Type>
+Type LinkedList<Type>::front() const {
+	return head->data;
+}
+
+template <class Type>
+Type LinkedList<Type>::back() const {
+	return tail->data;
+}
+
+template <class Type>
+bool LinkedList<Type>::isEmpty() const {
+	return theSize == 0? true: false;
+}
+
+template <class Type>
+unsigned long LinkedList<Type>::size() const {
+	return theSize;
+}
+
+template <class Type>
+Node<Type>* LinkedList<Type>::find(const Type &passedData) {
+
+	Node<Type> *ptr = head;
+	while (ptr->next != NULL) {
+		if (ptr->data == passedData)
+			return ptr;
+
+		ptr = ptr->next;
+	}
+
+	return NULL;
+
+}
+
+template <class Type>
+void LinkedList<Type>::clear() {
+
+	while(!isEmpty())
+		pop_front();
+
+}
+
 
 #endif /* LINKEDLIST_H_ */
