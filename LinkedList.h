@@ -9,6 +9,8 @@
 #define LINKEDLIST_H_
 
 #include <iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 
@@ -18,7 +20,7 @@ template <class Type>
 class Node {
 
 	//Member variables
-private:
+protected:
 	Type data;
 	Node *prev;
 	Node *next;
@@ -47,7 +49,7 @@ private:
 template <class Type>
 class LinkedList {
 
-protected:
+private:
 	//Member variables
 	Node<Type> *head;
 	Node<Type> *tail;
@@ -68,6 +70,7 @@ public:
 	void removeAt(unsigned long pos);
 	void removeFirstOccurenceOf(const Type &passedData);
 	void removeLastOccurenceOf(const Type &passedData);
+	Type& getAt(unsigned long idx);
 	Node<Type>* find(const Type &passedData);
 	void clear();
 	void display() const;
@@ -77,6 +80,8 @@ public:
 	Type back() const;
 	bool isEmpty() const;
 	unsigned long size() const;
+	void sortList();
+	void sortList( bool (*compare)(const Type&, const Type&) );
 
 	void reverse();
 
@@ -351,6 +356,34 @@ void LinkedList<Type>::removeLastOccurenceOf(const Type &passedData) {
 }
 
 template <class Type>
+Type& LinkedList<Type>::getAt(unsigned long idx) {
+
+	if (idx == 0)
+		return head->data;
+	else if (idx == this->size() - 1)
+		return tail->data;
+	else if (idx < 0 || idx > this->size()) {
+		//throw out of bounds exception
+	}
+	else if (idx < this->size() / 2) {	//traverse from head
+		Node<Type> *ptr = head;
+		while (idx--) {
+			ptr = ptr->next;
+		}
+		return ptr->data;
+	}
+	else {	//traverse from tail
+		Node<Type> *ptr = tail;
+		idx = this->size() - idx - 1;
+		while (idx--) {
+			ptr = ptr->prev;
+		}
+		return ptr->data;
+	}
+
+}
+
+template <class Type>
 Node<Type>* LinkedList<Type>::getHead() const {
 	return head;
 }
@@ -400,6 +433,52 @@ void LinkedList<Type>::clear() {
 
 	while(!isEmpty())
 		pop_front();
+
+}
+
+template <class Type>
+void LinkedList<Type>::sortList() {
+
+	vector<Type> tmp;
+	unsigned long size = this->size();
+	tmp.resize(size);
+
+	Node<Type> *ptr = head;
+	for (unsigned long i = 0; i < size; ++i) {	//copy linked list elements into a vector to be sorted
+		tmp[i] = ptr->data;
+		ptr = ptr->next;
+	}
+
+	sort(tmp.begin(), tmp.end());	//using C++ built-in sort() function
+
+	ptr = head;
+	for (unsigned long i = 0; i < size; ++i) {	//return elements after sorting from vector into linked list
+		ptr->data = tmp[i];
+		ptr = ptr->next;
+	}
+
+}
+
+template <class Type>
+void LinkedList<Type>::sortList( bool (*compare)(const Type&, const Type&) ) {
+
+	vector<Type> tmp;
+	unsigned long size = this->size();
+	tmp.resize(size);
+
+	Node<Type> *ptr = head;
+	for (unsigned long i = 0; i < size; ++i) {	//copy linked list elements into a vector to be sorted
+		tmp[i] = ptr->data;
+		ptr = ptr->next;
+	}
+
+	sort(tmp.begin(), tmp.end(), compare);	//using C++ built-in sort() function
+
+	ptr = head;
+	for (unsigned long i = 0; i < size; ++i) {	//return elements after sorting from vector into linked list
+		ptr->data = tmp[i];
+		ptr = ptr->next;
+	}
 
 }
 
